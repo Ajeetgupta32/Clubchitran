@@ -1,0 +1,35 @@
+# Render Blueprint Specification
+# Deploy both Database and Backend API on Render with 1-click
+services:
+  - type: web
+    name: college-club-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: college-club-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        value: "*" # Replace with your Vercel deployment URL (e.g. https://your-club.vercel.app)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+databases:
+  - name: college-club-db
+    plan: free
+    databaseName: college_club_db
+    user: club_admin

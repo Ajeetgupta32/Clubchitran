@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  COORDINATOR
+  STUDENT
+}
+
+enum ActivityStatus {
+  DRAFT
+  PUBLISHED
+  COMPLETED
+}
+
+enum ParticipationStatus {
+  REGISTERED
+  COMPLETED
+  CANCELLED
+}
+
+enum SubmissionStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+}
+
+enum CertificateStatus {
+  ISSUED
+  REVOKED
+}
+
+enum CertificateRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         Role      @default(STUDENT)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  student      Student?
+  coordinator  Coordinator?
+
+  activitiesCreated    Activity[]        @relation("CreatedActivities")
+  submissionsVerified  PhotoSubmission[] @relation("VerifiedSubmissions")
+  attendanceMarked     Attendance[]      @relation("MarkedAttendances")
+  certificatesIssued   Certificate[]     @relation("IssuedCertificates")
+
+  @@map("users")
+}
+
+model Student {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  studentId   String   @unique // Roll Number / Register ID
+  branch      String   // e.g. "Computer Science & Engineering"
+  section     String   // e.g. "A"
+  year        String   // e.g. "3rd Year"
+  semester    String   // e.g. "5th Sem"
+  phone       String?
+  points      Int      @default(0) // Activity points earned upon photo verification
+  awardStatus String?  // e.g. "Monthly Star: Certificate & Gift Recipient"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  participations      Participation[]
+  certificates        Certificate[]
+  certificateRequests CertificateRequest[]
+
+  @@map("students")
+}
+
+model Coordinator {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  department      String   // e.g. "Computer Science & Engineering"
+  assignedBranch  String   @default("Computer Science & Engineering") // ONE branch restriction
+  assignedSection String?  // Optional section restriction (null = whole branch)
+  phone           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedActivities  ActivityCoordinator[]
+  certificateRequests CertificateRequest[]
+
+  @@map("coordinators")
+}
+
+model Activity {
+  id          String         @id @default(uuid())
+  title       String
+  description String         @db.Text
+  category    String         // e.g. "Technical", "Cultural", "Sports", "Social", "Academic"
+  venue       String
+  eventDate   DateTime
+  deadline    DateTime
+  status      ActivityStatus @default(DRAFT)
+  bannerUrl   String?
+  createdById String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  createdBy           User                  @relation("CreatedActivities", fields: [createdById], references: [id])
+  coordinators        ActivityCoordinator[]
+  participations      Participation[]
+  certificates        Certificate[]
+  certificateRequests CertificateRequest[]
+
+  @@map("activities")
+}
+
+model ActivityCoordinator {
+  activityId    String
+  coordinatorId String
+  assignedAt    DateTime @default(now())
+
+  activity    Activity    @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  coordinator Coordinator @relation(fields: [coordinatorId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, coordinatorId])
+  @@map("activity_coordinators")
+}
+
+model Participation {
+  id           String              @id @default(uuid())
+  studentId    String
+  activityId   String
+  registeredAt DateTime            @default(now())
+  status       ParticipationStatus @default(REGISTERED)
+
+  student     Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  activity    Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  submissions PhotoSubmission[]
+  attendance  Attendance?
+
+  // Prevent duplicate student participation in the same activity
+  @@unique([studentId, activityId])
+  @@map("participations")
+}
+
+model PhotoSubmission {
+  id                 String           @id @default(uuid())
+  participationId    String
+  photoUrl           String
+  publicId           String?
+  caption            String?
+  status             SubmissionStatus @default(PENDING)
+  rejectionReason    String?          @db.Text
+  verifiedById       String?
+  verifiedAt         DateTime?
+  isTopPick          Boolean          @default(false) // Selected by Admin for Top 3
+  topPickRank        Int?             // 1 = 1st, 2 = 2nd, 3 = 3rd
+  topPickAwardedAt   DateTime?
+  submittedAt        DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  participation Participation @relation(fields: [participationId], references: [id], onDelete: Cascade)
+  verifiedBy    User?         @relation("VerifiedSubmissions", fields: [verifiedById], references: [id])
+
+  @@map("photo_submissions")
+}
+
+model Attendance {
+  id              String           @id @default(uuid())
+  participationId String           @unique
+  status          AttendanceStatus @default(PRESENT)
+  markedById      String
+  markedAt        DateTime         @default(now())
+
+  participation Participation @relation(fields: [participationId], references: [id], onDelete: Cascade)
+  markedBy      User          @relation("MarkedAttendances", fields: [markedById], references: [id])
+
+  @@map("attendances")
+}
+
+model Certificate {
+  id            String            @id @default(uuid())
+  certificateNo String            @unique // e.g. "CC-CERT-2026-0001"
+  studentId     String
+  studentName   String            // Snapshotted student name, editable by Admin
+  branch        String            // Snapshotted branch, editable by Admin
+  title         String            // e.g. "Certificate of Excellence - Top 3 Pick"
+  description   String?           @db.Text
+  issuedDate    DateTime          @default(now())
+  status        CertificateStatus @default(ISSUED)
+  activityId    String?
+  issuedById    String
+  requestId     String?           @unique
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  student  Student             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  issuedBy User                @relation("IssuedCertificates", fields: [issuedById], references: [id])
+  activity Activity?           @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  request  CertificateRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  @@map("certificates")
+}
+
+model CertificateRequest {
+  id              String                   @id @default(uuid())
+  coordinatorId   String
+  studentId       String
+  studentName     String                   // Suggested student name
+  branch          String                   // Suggested student branch
+  title           String                   @default("Certificate of Recognition") // Proposed certificate title
+  reason          String                   @db.Text // Reason or justification by coordinator
+  activityId      String?
+  status          CertificateRequestStatus @default(PENDING)
+  rejectionReason String?                  @db.Text
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  coordinator Coordinator  @relation(fields: [coordinatorId], references: [id], onDelete: Cascade)
+  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  activity    Activity?    @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  certificate Certificate?
+
+  @@map("certificate_requests")
+}
