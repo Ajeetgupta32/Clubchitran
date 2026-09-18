@@ -1,5 +1,6 @@
 import prisma from '../config/db.js';
 import { processUpload } from '../middleware/uploadMiddleware.js';
+import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
 
 export const uploadPhotoSubmission = async (req, res) => {
   try {
@@ -594,6 +595,15 @@ export const deleteSubmission = async (req, res) => {
         await prisma.attendance.deleteMany({
           where: { participationId: existing.participationId }
         }).catch((e) => console.error('Error removing attendance on photo delete:', e));
+      }
+    }
+
+    // Remove photo from Cloudinary if publicId exists
+    if (existing.publicId && isCloudinaryConfigured) {
+      try {
+        await cloudinary.uploader.destroy(existing.publicId);
+      } catch (err) {
+        console.warn('[Cloudinary] Error destroying image:', err.message);
       }
     }
 
