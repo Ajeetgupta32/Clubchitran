@@ -258,6 +258,24 @@ export const CertificateModal = ({ certificate, onClose }) => {
           </div>
         </div>
 
+        {/* Physical Certificate Delivery Banner (if physical) */}
+        {(certificate.isPhysical || certificate.deliveryType === 'PHYSICAL') && (
+          <div className="bg-amber-950/90 border-b border-amber-500/30 px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="font-bold">Physical Parchment Certificate:</span>
+              <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-extrabold uppercase text-[10px] border border-amber-500/30">
+                {certificate.physicalStatus?.replace(/_/g, ' ') || 'READY FOR COLLECTION'}
+              </span>
+            </div>
+            {certificate.physicalRemarks && (
+              <p className="text-[11px] text-amber-300/80 italic">
+                {certificate.physicalRemarks}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Certificate Display Card */}
         <div className="p-4 sm:p-8 bg-black/60 overflow-x-auto flex justify-center">
           <div
@@ -303,9 +321,22 @@ export const CertificateModal = ({ certificate, onClose }) => {
               <h5 className="text-[11px] sm:text-sm font-black text-amber-400 uppercase tracking-wider mt-0.5 font-serif">
                 Chitran Photography & Creative Society
               </h5>
-              <div className="inline-block mt-3 px-4 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest">
-                Certificate of Recognition
-              </div>
+              
+              {/* Badge based on Certificate Attributes */}
+              {certificate.isPhysical || certificate.deliveryType === 'PHYSICAL' ? (
+                <div className="inline-flex flex-wrap items-center justify-center gap-1.5 mt-2.5 px-3.5 py-1 rounded-full bg-amber-500/20 border-2 border-amber-400/80 text-amber-300 font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-lg">
+                  <span>🏆 Official Physical Parchment Edition</span>
+                  {certificate.rank && (
+                    <span className="px-2 py-0.5 bg-amber-400 text-stone-950 rounded-full font-black text-[10px] tracking-normal">
+                      Rank #{certificate.rank} Top Performer
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 mt-2.5 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 font-extrabold text-[10px] sm:text-xs uppercase tracking-wider">
+                  <span>🎓 Verified E-Certificate • Workshop Attendance</span>
+                </div>
+              )}
             </div>
 
             {/* Body: Recipient & Award */}

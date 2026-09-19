@@ -12,7 +12,9 @@ import {
   Users,
   CheckCircle2,
   FileSpreadsheet,
-  CheckSquare
+  CheckSquare,
+  Award,
+  Trophy
 } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import ActivityModal from '../../components/ui/ActivityModal';
@@ -194,6 +196,22 @@ export const AdminActivities = () => {
                       Coord: {act.coordinators.map((c) => c.coordinator?.user?.name || 'Coord').join(', ') || 'None'}
                     </span>
                   </div>
+
+                  {/* Certificate Status Badges */}
+                  {(act.certificatesIssuedAt || act.physicalCertsIssuedAt) && (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                      {act.certificatesIssuedAt && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          🎓 Certs Issued
+                        </span>
+                      )}
+                      {act.physicalCertsIssuedAt && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200">
+                          🏆 Top Awards
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer and Actions */}
@@ -203,6 +221,13 @@ export const AdminActivities = () => {
                   </span>
 
                   <div className="flex items-center gap-1">
+                    <Link
+                      to="/admin/certificates"
+                      title="Issue & Manage Certificates"
+                      className="p-1.5 text-stone-500 hover:text-amber-700 rounded-lg hover:bg-[#F5F0E8] transition-colors"
+                    >
+                      <Award className="w-4 h-4" />
+                    </Link>
                     <Link
                       to={`/admin/submissions?activityId=${act.id}`}
                       title="Review Submissions"

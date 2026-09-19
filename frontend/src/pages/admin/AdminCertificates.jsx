@@ -14,7 +14,13 @@ import {
   Calendar,
   AlertCircle,
   FileCheck,
-  Trash2
+  Trash2,
+  Trophy,
+  PackageCheck,
+  Send,
+  Sparkles,
+  Medal,
+  RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
@@ -22,6 +28,8 @@ import CertificateModal from '../../components/ui/CertificateModal';
 import EditCertificateModal from '../../components/ui/EditCertificateModal';
 import DirectIssueCertificateModal from '../../components/ui/DirectIssueCertificateModal';
 import ApproveCertificateModal from '../../components/ui/ApproveCertificateModal';
+import BulkIssueWorkshopCertificatesModal from '../../components/ui/BulkIssueWorkshopCertificatesModal';
+import IssueTopPerformerModal from '../../components/ui/IssueTopPerformerModal';
 
 export const AdminCertificates = () => {
   const [activeTab, setActiveTab] = useState('proposals'); // 'proposals' | 'issued'
@@ -36,13 +44,17 @@ export const AdminCertificates = () => {
   const [certificates, setCertificates] = useState([]);
   const [certSearch, setCertSearch] = useState('');
   const [certBranch, setCertBranch] = useState('ALL');
+  const [certDeliveryFilter, setCertDeliveryFilter] = useState('ALL'); // 'ALL' | 'DIGITAL' | 'PHYSICAL'
   const [loadingCerts, setLoadingCerts] = useState(true);
+  const [updatingPhysicalId, setUpdatingPhysicalId] = useState(null);
 
   // Modals state
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [editingCertificate, setEditingCertificate] = useState(null);
   const [approvingRequest, setApprovingRequest] = useState(null);
   const [directIssueOpen, setDirectIssueOpen] = useState(false);
+  const [bulkWorkshopModalOpen, setBulkWorkshopModalOpen] = useState(false);
+  const [topPerformerModalOpen, setTopPerformerModalOpen] = useState(false);
 
   // Load Requests
   const fetchRequests = async () => {
@@ -71,6 +83,7 @@ export const AdminCertificates = () => {
       const params = {};
       if (certSearch) params.search = certSearch;
       if (certBranch !== 'ALL') params.branch = certBranch;
+      if (certDeliveryFilter !== 'ALL') params.deliveryType = certDeliveryFilter;
 
       const res = await api.get('/certificates/admin/all', { params });
       if (res.data.success) {
@@ -90,7 +103,25 @@ export const AdminCertificates = () => {
     } else {
       fetchCertificates();
     }
-  }, [activeTab, requestFilter, certBranch]);
+  }, [activeTab, requestFilter, certBranch, certDeliveryFilter]);
+
+  // Handle Physical Certificate Dispatch Status Update
+  const handleUpdatePhysicalStatus = async (certId, status) => {
+    try {
+      setUpdatingPhysicalId(certId);
+      const res = await api.patch(`/certificates/admin/${certId}/physical-status`, {
+        physicalStatus: status
+      });
+      if (res.data.success) {
+        toast.success(`Physical status updated: ${status.replace(/_/g, ' ')}`);
+        fetchCertificates();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update physical status');
+    } finally {
+      setUpdatingPhysicalId(null);
+    }
+  };
 
   // Handle Decline Proposal
   const handleReject = async (requestId, studentName) => {
@@ -129,9 +160,9 @@ export const AdminCertificates = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-[#E8E2D5] shadow-xs">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-[#E8E2D5] shadow-xs">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shadow-xs shrink-0">
             <Award className="w-6 h-6" />
           </div>
           <div>
@@ -142,18 +173,39 @@ export const AdminCertificates = () => {
               </span>
             </h1>
             <p className="text-xs sm:text-sm text-stone-500 mt-1">
-              Review coordinator proposals, edit details, and issue official authenticated credentials
+              Issue digital certificates to workshop attendees, parchment physical awards to top performers, and review coordinator proposals
             </p>
           </div>
         </div>
 
-        <button
-          onClick={() => setDirectIssueOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4 text-amber-400" />
-          <span>Issue Certificate Directly</span>
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => setBulkWorkshopModalOpen(true)}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+            title="Send bulk verified digital certificates to all attendees of an activity or workshop"
+          >
+            <Send className="w-4 h-4 text-emerald-300" />
+            <span>Send Workshop Certs</span>
+          </button>
+
+          <button
+            onClick={() => setTopPerformerModalOpen(true)}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+            title="Award physical parchment certificate with rank and dispatch tracking"
+          >
+            <Trophy className="w-4 h-4 text-amber-300" />
+            <span>Award Physical Cert</span>
+          </button>
+
+          <button
+            onClick={() => setDirectIssueOpen(true)}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+          >
+            <Plus className="w-4 h-4 text-amber-400" />
+            <span>Direct Issue</span>
+          </button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
@@ -360,8 +412,8 @@ export const AdminCertificates = () => {
       {activeTab === 'issued' && (
         <div className="space-y-4">
           {/* Search / Filter Controls */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E8E2D5] shadow-xs">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#E8E2D5] shadow-xs">
+            <div className="flex items-center gap-2 flex-1">
               <div className="relative flex-1 sm:w-64">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
@@ -381,8 +433,28 @@ export const AdminCertificates = () => {
               </button>
             </div>
 
+            {/* Delivery Type Quick Tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0">
+              {[
+                { id: 'ALL', label: 'All Formats' },
+                { id: 'DIGITAL', label: '🎓 Digital' },
+                { id: 'PHYSICAL', label: '🏆 Physical' }
+              ].map((dt) => (
+                <button
+                  key={dt.id}
+                  onClick={() => setCertDeliveryFilter(dt.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer whitespace-nowrap ${
+                    certDeliveryFilter === dt.id
+                      ? 'bg-stone-900 text-white shadow-xs'
+                      : 'bg-[#FAF8F5] text-stone-600 hover:text-stone-900 border border-[#E8E2D5]'
+                  }`}
+                >
+                  {dt.label}
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-2">
-              <span className="text-xs text-stone-500 font-medium">Filter Branch:</span>
               <select
                 value={certBranch}
                 onChange={(e) => setCertBranch(e.target.value)}
@@ -409,6 +481,7 @@ export const AdminCertificates = () => {
                     <th className="px-5 py-4">Certificate ID</th>
                     <th className="px-5 py-4">Recipient Student</th>
                     <th className="px-5 py-4">Certificate Honor / Title</th>
+                    <th className="px-5 py-4">Format & Dispatch</th>
                     <th className="px-5 py-4">Issue Date</th>
                     <th className="px-5 py-4">Status</th>
                     <th className="px-5 py-4 text-right">Actions</th>
@@ -417,14 +490,14 @@ export const AdminCertificates = () => {
                 <tbody className="divide-y divide-[#E8E2D5]">
                   {loadingCerts ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-12 text-stone-500">
+                      <td colSpan="7" className="text-center py-12 text-stone-500">
                         Loading issued certificates...
                       </td>
                     </tr>
                   ) : certificates.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-12 text-stone-500">
-                        No issued certificates found. Use "Issue Certificate Directly" to create one.
+                      <td colSpan="7" className="text-center py-12 text-stone-500">
+                        No issued certificates found matching the filter. Use "Send Workshop Certs" or "Award Physical Cert" to issue.
                       </td>
                     </tr>
                   ) : (
@@ -446,6 +519,43 @@ export const AdminCertificates = () => {
                           <p className="font-semibold text-stone-800">{cert.title}</p>
                           {cert.activity && (
                             <p className="text-[11px] text-amber-800 font-medium">{cert.activity.title}</p>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          {cert.deliveryType === 'PHYSICAL' || cert.isPhysical ? (
+                            <div className="space-y-1.5 min-w-[170px]">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-950 font-black text-[10px] border border-amber-300 shadow-2xs">
+                                <Trophy className="w-3 h-3 text-amber-700" />
+                                {cert.rank ? `Physical Parchment • Rank #${cert.rank}` : 'Physical Parchment • Top Performer'}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <select
+                                  value={cert.physicalStatus || 'PENDING_PRINT'}
+                                  onChange={(e) => handleUpdatePhysicalStatus(cert.id, e.target.value)}
+                                  disabled={updatingPhysicalId === cert.id}
+                                  className="text-[10px] font-semibold px-2 py-1 bg-white rounded-md border border-amber-300 text-stone-800 outline-none cursor-pointer focus:ring-1 focus:ring-amber-700 w-full"
+                                >
+                                  <option value="PENDING_PRINT">🖨️ Pending Print</option>
+                                  <option value="PRINTED">📜 Printed & Ready</option>
+                                  <option value="READY_FOR_COLLECTION">📍 Ready for Collection</option>
+                                  <option value="DISPATCHED">🚚 Dispatched</option>
+                                  <option value="HANDED_OVER">🎖️ Handed Over</option>
+                                </select>
+                              </div>
+                              {cert.physicalRemarks && (
+                                <p className="text-[10px] text-stone-500 italic max-w-xs truncate" title={cert.physicalRemarks}>
+                                  {cert.physicalRemarks}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-900 font-bold text-[10px] border border-emerald-200">
+                                <Sparkles className="w-3 h-3 text-emerald-600" />
+                                {cert.certificateType === 'PARTICIPATION' ? 'Digital Attendee' : 'Digital E-Certificate'}
+                              </span>
+                              <p className="text-[10px] text-stone-400">Verifiable E-Credential</p>
+                            </div>
                           )}
                         </td>
                         <td className="px-5 py-3.5 text-stone-600">
@@ -537,6 +647,28 @@ export const AdminCertificates = () => {
       {directIssueOpen && (
         <DirectIssueCertificateModal
           onClose={() => setDirectIssueOpen(false)}
+          onIssued={() => {
+            fetchCertificates();
+            setActiveTab('issued');
+          }}
+        />
+      )}
+
+      {/* Bulk Issue Workshop Certificates to All Attendees Modal */}
+      {bulkWorkshopModalOpen && (
+        <BulkIssueWorkshopCertificatesModal
+          onClose={() => setBulkWorkshopModalOpen(false)}
+          onIssued={() => {
+            fetchCertificates();
+            setActiveTab('issued');
+          }}
+        />
+      )}
+
+      {/* Issue Top Performer Physical Certificate Modal */}
+      {topPerformerModalOpen && (
+        <IssueTopPerformerModal
+          onClose={() => setTopPerformerModalOpen(false)}
           onIssued={() => {
             fetchCertificates();
             setActiveTab('issued');

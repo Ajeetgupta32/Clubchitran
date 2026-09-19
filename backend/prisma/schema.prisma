@@ -116,6 +116,8 @@ model Activity {
   status      ActivityStatus @default(DRAFT)
   bannerUrl   String?
   createdById String
+  certificatesIssuedAt   DateTime? // When bulk digital certificates were sent to attendees
+  physicalCertsIssuedAt  DateTime? // When physical certificates were awarded to top performers
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
@@ -205,6 +207,16 @@ model Certificate {
   activityId    String?
   issuedById    String
   requestId     String?           @unique
+
+  // Attributes for Workshop Attendee & Physical Top Performer Certificates
+  deliveryType    String          @default("DIGITAL") // "DIGITAL" or "PHYSICAL"
+  certificateType String          @default("PARTICIPATION") // "PARTICIPATION", "TOP_PERFORMER", "MERIT"
+  isPhysical      Boolean         @default(false)
+  isTopPerformer  Boolean         @default(false)
+  rank            Int?            // e.g. 1, 2, 3 for Top Performers
+  physicalStatus  String?         // "PENDING_PRINT", "PRINTED", "READY_FOR_COLLECTION", "HANDED_OVER"
+  physicalRemarks String?         @db.Text // Special recognition / collection details
+
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
@@ -227,6 +239,12 @@ model CertificateRequest {
   activityId      String?
   status          CertificateRequestStatus @default(PENDING)
   rejectionReason String?                  @db.Text
+
+  // Proposed Delivery & Recognition Attributes
+  deliveryType    String                   @default("DIGITAL")
+  isTopPerformer  Boolean                  @default(false)
+  rank            Int?
+
   createdAt       DateTime                 @default(now())
   updatedAt       DateTime                 @updatedAt
 

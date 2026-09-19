@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Award, Download, Eye, Calendar, Sparkles, Trophy, CheckCircle2 } from 'lucide-react';
+import { Award, Download, Eye, Calendar, Sparkles, Trophy, CheckCircle2, PackageCheck, Clock } from 'lucide-react';
 import CertificateModal from '../../components/ui/CertificateModal';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+
+const getPhysicalStatusBadge = (status) => {
+  switch (status) {
+    case 'PRINTED':
+      return { label: '📜 Printed & Embossed', color: 'bg-blue-50 text-blue-900 border-blue-200' };
+    case 'READY_FOR_COLLECTION':
+      return { label: '📍 Ready for Collection', color: 'bg-emerald-50 text-emerald-900 border-emerald-300' };
+    case 'DISPATCHED':
+      return { label: '🚚 Dispatched', color: 'bg-purple-50 text-purple-900 border-purple-200' };
+    case 'HANDED_OVER':
+      return { label: '🎖️ Handed Over', color: 'bg-stone-100 text-stone-800 border-stone-300' };
+    case 'PENDING_PRINT':
+    default:
+      return { label: '🖨️ In Print Queue', color: 'bg-amber-50 text-amber-900 border-amber-200' };
+  }
+};
 
 export const StudentCertificates = () => {
   const [certificates, setCertificates] = useState([]);
@@ -79,10 +95,19 @@ export const StudentCertificates = () => {
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F5F0E8] text-stone-600 border border-[#E8E2D5]">
                     {cert.certificateNo}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                    Verified
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {cert.deliveryType === 'PHYSICAL' || cert.isPhysical ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-950 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300 shadow-2xs">
+                        <Trophy className="w-3 h-3 text-amber-700" />
+                        {cert.rank ? `Physical • Rank #${cert.rank}` : 'Physical Award'}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <Sparkles className="w-3 h-3 text-emerald-600" />
+                        {cert.certificateType === 'PARTICIPATION' ? 'Digital Attendee' : 'Verified'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Certificate Title */}
@@ -94,6 +119,31 @@ export const StudentCertificates = () => {
                     {cert.description || 'Awarded for active visual excellence in club events.'}
                   </p>
                 </div>
+
+                {/* Physical Certificate Collection Status Callout */}
+                {(cert.deliveryType === 'PHYSICAL' || cert.isPhysical) && (
+                  <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-amber-900 flex items-center gap-1">
+                        <PackageCheck className="w-3.5 h-3.5 text-amber-700" />
+                        Physical Copy:
+                      </span>
+                      {(() => {
+                        const b = getPhysicalStatusBadge(cert.physicalStatus);
+                        return (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${b.color}`}>
+                            {b.label}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                    {cert.physicalRemarks && (
+                      <p className="text-[10px] text-amber-800/80 italic pt-0.5">
+                        Note: {cert.physicalRemarks}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Metadata */}
                 <div className="p-3 bg-[#FAF8F5] rounded-2xl border border-[#E8E2D5] space-y-1.5 text-xs text-stone-600">

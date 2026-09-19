@@ -10,7 +10,11 @@ import {
   issueCertificateDirectly,
   updateCertificate,
   getAllCertificates,
-  deleteCertificate
+  deleteCertificate,
+  issueWorkshopAttendeeCertificates,
+  issueTopPerformerCertificate,
+  issueTopPicksPhysicalCertificates,
+  updatePhysicalCertificateStatus
 } from '../controllers/certificateController.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 
@@ -34,6 +38,10 @@ router.put('/admin/requests/:id/approve', authenticate, authorize('ADMIN'), appr
 router.post('/admin/requests/:id/reject', authenticate, authorize('ADMIN'), rejectRequest);
 router.put('/admin/requests/:id/reject', authenticate, authorize('ADMIN'), rejectRequest);
 router.post('/admin/issue', authenticate, authorize('ADMIN'), issueCertificateDirectly);
+router.post('/admin/issue-workshop-attendees', authenticate, authorize('ADMIN'), issueWorkshopAttendeeCertificates);
+router.post('/admin/issue-top-performer', authenticate, authorize('ADMIN'), issueTopPerformerCertificate);
+router.post('/admin/issue-top-picks', authenticate, authorize('ADMIN'), issueTopPicksPhysicalCertificates);
+router.patch('/admin/:id/physical-status', authenticate, authorize('ADMIN'), updatePhysicalCertificateStatus);
 router.put('/admin/:id', authenticate, authorize('ADMIN'), updateCertificate);
 router.delete('/admin/:id', authenticate, authorize('ADMIN'), deleteCertificate);
 router.get('/admin/all', authenticate, authorize('ADMIN'), getAllCertificates);
