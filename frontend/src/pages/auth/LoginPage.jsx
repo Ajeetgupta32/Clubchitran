@@ -134,6 +134,19 @@ export const LoginPage = () => {
               )}
             </button>
           </form>
+
+          {/* Student Registration Link */}
+          <div className="mt-5 pt-4 border-t border-[#E8E2D5] text-center">
+            <p className="text-xs text-stone-600">
+              New student?{' '}
+              <Link
+                to="/register"
+                className="font-bold text-amber-800 hover:text-amber-900 underline transition-colors"
+              >
+                Join Chitran Club (Student Registration)
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

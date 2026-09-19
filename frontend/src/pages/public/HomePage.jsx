@@ -118,13 +118,21 @@ export const HomePage = () => {
                 </span>
               </Link>
             ) : (
-              <Link
-                to="/login"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
-              >
-                <span>Sign In</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="px-3.5 py-2 text-xs font-bold text-stone-700 hover:text-stone-950 hover:bg-stone-100 rounded-xl border border-transparent transition-all"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                >
+                  <span>Join Chitran Club</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -154,13 +162,20 @@ export const HomePage = () => {
 
               {/* CTA Buttons */}
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
-                <a
-                  href="#top-picks"
+                <Link
+                  to="/register"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-md shadow-stone-900/10 transition-all cursor-pointer"
                 >
-                  <Award className="w-4 h-4 text-amber-400" />
-                  <span>View Top 3 Picks</span>
+                  <Camera className="w-4 h-4 text-amber-400" />
+                  <span>Join Chitran Club</span>
                   <ArrowRight className="w-4 h-4" />
+                </Link>
+                <a
+                  href="#top-picks"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-stone-50 text-stone-800 border border-[#E8E2D5] text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                >
+                  <Award className="w-4 h-4 text-amber-700" />
+                  <span>View Top 3 Picks</span>
                 </a>
                 <Link
                   to="/gallery"
@@ -517,6 +532,32 @@ export const HomePage = () => {
                   Coordinates visual arts events, creative media exhibitions, and supervises ECE student verifications.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Student Enrollment CTA Banner */}
+        <section className="py-16 bg-stone-900 text-white relative overflow-hidden border-t border-[#E8E2D5]">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-800 border border-stone-700 text-amber-400 text-xs font-bold mb-4 shadow-xs">
+              <Camera className="w-3.5 h-3.5" />
+              <span>Open to All KGI College Students</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+              Ready to Capture Your College Story?
+            </h2>
+            <p className="mt-3 text-xs sm:text-sm text-stone-300 max-w-xl mx-auto leading-relaxed">
+              Join Chitran Photography Club today. Participate in campus photo walks, earn verified activity points, and get official certificates for your portfolio.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs rounded-xl shadow-lg transition-all cursor-pointer"
+              >
+                <span>Join Chitran Club (Student Registration)</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </section>
