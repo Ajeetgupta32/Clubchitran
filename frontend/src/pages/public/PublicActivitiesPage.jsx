@@ -202,6 +202,10 @@ export const PublicActivitiesPage = () => {
                       src={resolveImageUrl(act.bannerUrl) || 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80'}
                       alt={act.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80';
+                      }}
                     />
                     <div className="absolute top-3 left-3">
                       <span className="px-2.5 py-1 bg-stone-900/80 backdrop-blur-sm text-amber-400 text-[11px] font-bold rounded-lg uppercase border border-stone-700 shadow-sm">

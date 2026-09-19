@@ -209,7 +209,15 @@ export const StudentSubmissions = () => {
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
         >
           <div className="relative max-w-3xl max-h-[85vh] overflow-hidden rounded-2xl">
-            <img src={resolveImageUrl(viewingPhoto)} alt="Full proof" className="max-w-full max-h-[85vh] object-contain rounded-2xl" />
+            <img
+              src={resolveImageUrl(viewingPhoto)}
+              alt="Full proof"
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80';
+              }}
+            />
           </div>
         </div>
       )}

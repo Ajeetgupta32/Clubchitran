@@ -198,6 +198,10 @@ export const AdminTopPicks = () => {
                         src={resolveImageUrl(sub.photoUrl)}
                         alt="Top pick"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&auto=format&fit=crop&q=80';
+                        }}
                       />
                       <button
                         onClick={(e) => handleDownload(e, sub)}
@@ -293,6 +297,10 @@ export const AdminTopPicks = () => {
                         src={resolveImageUrl(sub.photoUrl)}
                         alt={sub.studentName}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&auto=format&fit=crop&q=80';
+                        }}
                       />
                       {currentRank && (
                         <div className="absolute top-2 left-2 px-2.5 py-1 rounded-lg bg-stone-900 text-amber-400 font-black text-xs shadow-md border border-amber-500/30">

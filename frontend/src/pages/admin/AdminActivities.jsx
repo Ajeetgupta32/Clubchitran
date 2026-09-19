@@ -159,6 +159,10 @@ export const AdminActivities = () => {
                   src={resolveImageUrl(act.bannerUrl) || 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80'}
                   alt={act.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80';
+                  }}
                 />
                 <div className="absolute top-3 left-3">
                   <span className="px-2.5 py-1 bg-stone-950/80 backdrop-blur-sm text-white text-[11px] font-bold rounded-lg uppercase tracking-wide border border-white/10">

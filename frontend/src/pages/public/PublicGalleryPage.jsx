@@ -252,6 +252,10 @@ export const PublicGalleryPage = () => {
                         onClick={() => setSelectedLightboxPhoto(photo)}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&auto=format&fit=crop&q=80';
+                        }}
                       />
 
                       {/* Category Tag */}
@@ -340,6 +344,10 @@ export const PublicGalleryPage = () => {
                 src={resolveImageUrl(selectedLightboxPhoto.photoUrl)}
                 alt={selectedLightboxPhoto.activityTitle}
                 className="max-h-[65vh] w-auto object-contain mx-auto"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&auto=format&fit=crop&q=80';
+                }}
               />
               <button
                 onClick={() => setSelectedLightboxPhoto(null)}

@@ -4,11 +4,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Parse individual keys or CLOUDINARY_URL if provided
-let cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-let apiKey = process.env.CLOUDINARY_API_KEY;
-let apiSecret = process.env.CLOUDINARY_API_SECRET;
+let cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'k7ebomyr';
+let apiKey = process.env.CLOUDINARY_API_KEY || '379819438559986';
+let apiSecret = process.env.CLOUDINARY_API_SECRET || 'rvqUFd1eezzYXVQppMQmF7P6LBQ';
 
-if ((!cloudName || !apiKey || !apiSecret) && process.env.CLOUDINARY_URL) {
+if ((!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) && process.env.CLOUDINARY_URL) {
   try {
     // format: cloudinary://api_key:api_secret@cloud_name
     const parsed = new URL(process.env.CLOUDINARY_URL);
