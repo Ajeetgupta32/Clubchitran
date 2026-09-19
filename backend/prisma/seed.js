@@ -16,15 +16,15 @@ async function main() {
   await prisma.coordinator.deleteMany();
   await prisma.user.deleteMany();
 
-  const adminPasswordHash = await bcrypt.hash('Admin@123', 10);
+  const adminPasswordHash = await bcrypt.hash('Ajeetgupta123@', 10);
   const coordPasswordHash = await bcrypt.hash('Coord@123', 10);
   const studentPasswordHash = await bcrypt.hash('Student@123', 10);
 
   // 1. Create Admin
   const admin = await prisma.user.create({
     data: {
-      name: 'Dr. Rajesh Sharma (Dean / Admin)',
-      email: 'admin@college.edu',
+      name: 'Ajeet Gupta (Tech Head) ',
+      email: 'gulshangupta3124@gmail.com',
       passwordHash: adminPasswordHash,
       role: 'ADMIN'
     }
