@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import {
   CheckSquare,
   Search,
@@ -13,10 +13,13 @@ import {
   Camera,
   Download,
   ExternalLink,
-  Trash2
+  Trash2,
+  Upload,
+  Medal
 } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import PhotoReviewModal from '../../components/ui/PhotoReviewModal';
+import AdminPhotoUploadModal from '../../components/ui/AdminPhotoUploadModal';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import downloadImage from '../../utils/downloadHelper';
@@ -39,6 +42,7 @@ export const AdminSubmissions = () => {
   const [meta, setMeta] = useState({ branches: [], sections: [] });
 
   const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [showAdminUpload, setShowAdminUpload] = useState(false);
 
   const fetchMetaAndActivities = async () => {
     try {
@@ -142,6 +146,24 @@ export const AdminSubmissions = () => {
           <p className="text-xs sm:text-sm text-stone-500 mt-1">
             Admin oversight: review student photographs, download proofs, and verify attendance Present
           </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => setShowAdminUpload(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-amber-400 text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+          >
+            <Upload className="w-4 h-4 text-amber-400" />
+            <span>Upload Photograph</span>
+          </button>
+          <Link
+            to="/admin/top-picks"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-bold rounded-xl shadow-xs transition-all"
+          >
+            <Medal className="w-4 h-4 text-amber-700" />
+            <span>Curate Top 3 Picks</span>
+          </Link>
         </div>
       </div>
 
@@ -340,6 +362,13 @@ export const AdminSubmissions = () => {
           submission={selectedSubmission}
           onClose={() => setSelectedSubmission(null)}
           onUpdated={fetchSubmissions}
+        />
+      )}
+
+      {showAdminUpload && (
+        <AdminPhotoUploadModal
+          onClose={() => setShowAdminUpload(false)}
+          onUploaded={fetchSubmissions}
         />
       )}
     </div>

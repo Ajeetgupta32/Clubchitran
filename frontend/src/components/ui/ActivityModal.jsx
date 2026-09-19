@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, Tag, Users, Upload, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 export const ActivityModal = ({ activity, onClose, onSaved }) => {
   const isEditing = Boolean(activity);
@@ -180,6 +181,25 @@ export const ActivityModal = ({ activity, onClose, onSaved }) => {
                 onChange={handleBannerChange}
                 className="w-full text-xs text-stone-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#F5F0E8] file:text-stone-800 hover:file:bg-stone-200"
               />
+              {bannerPreview && (
+                <div className="mt-2 relative h-20 w-full rounded-xl overflow-hidden border border-[#E8E2D5] bg-stone-900 group">
+                  <img
+                    src={bannerPreview.startsWith('blob:') ? bannerPreview : (resolveImageUrl(bannerPreview) || bannerPreview)}
+                    alt="Banner Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBannerFile(null);
+                      setBannerPreview(null);
+                    }}
+                    className="absolute top-1 right-1 px-2 py-0.5 bg-stone-900/80 text-white rounded-md text-[10px] font-bold hover:bg-rose-600 transition-colors cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

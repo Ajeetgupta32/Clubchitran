@@ -15,6 +15,7 @@ import {
   Camera
 } from 'lucide-react';
 import ClubLogo from '../../components/ui/ClubLogo';
+import { resolveImageUrl } from '../../utils/imageUrl';
 import api from '../../services/api';
 
 export const PublicActivitiesPage = () => {
@@ -198,7 +199,7 @@ export const PublicActivitiesPage = () => {
                 >
                   <div className="h-44 bg-stone-100 relative overflow-hidden">
                     <img
-                      src={act.bannerUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80'}
+                      src={resolveImageUrl(act.bannerUrl) || 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80'}
                       alt={act.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

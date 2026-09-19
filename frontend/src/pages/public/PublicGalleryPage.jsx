@@ -12,11 +12,13 @@ import {
   ArrowRight,
   ChevronRight,
   Filter,
-  Eye
+  Eye,
+  Upload
 } from 'lucide-react';
 import ClubLogo from '../../components/ui/ClubLogo';
 import { downloadImage } from '../../utils/downloadHelper';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import AdminPhotoUploadModal from '../../components/ui/AdminPhotoUploadModal';
 import api from '../../services/api';
 
 export const PublicGalleryPage = () => {
@@ -26,22 +28,24 @@ export const PublicGalleryPage = () => {
   const [category, setCategory] = useState('ALL');
   const [search, setSearch] = useState('');
   const [selectedLightboxPhoto, setSelectedLightboxPhoto] = useState(null);
+  const [showAdminUpload, setShowAdminUpload] = useState(false);
+
+  const fetchGallery = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/submissions/gallery');
+      if (res.data.success) {
+        setGalleryPhotos(res.data.gallery || []);
+      }
+    } catch (err) {
+      console.error('Error loading gallery:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const fetchGallery = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get('/submissions/gallery');
-        if (res.data.success) {
-          setGalleryPhotos(res.data.gallery || []);
-        }
-      } catch (err) {
-        console.error('Error loading gallery:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchGallery();
   }, []);
 
@@ -146,15 +150,29 @@ export const PublicGalleryPage = () => {
               </p>
             </div>
 
-            {/* Total Count Badge */}
-            <div className="shrink-0 p-4 bg-white rounded-2xl border border-[#E8E2D5] shadow-xs flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center font-bold">
-                <Camera className="w-5 h-5" />
+            {/* Header Right Actions */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Total Count Badge */}
+              <div className="shrink-0 p-3.5 bg-white rounded-2xl border border-[#E8E2D5] shadow-xs flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center font-bold">
+                  <Camera className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-lg font-black text-stone-900">{galleryPhotos.length}</p>
+                  <p className="text-[10px] text-stone-500 font-semibold">Verified Photos</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xl font-black text-stone-900">{galleryPhotos.length}</p>
-                <p className="text-[11px] text-stone-500 font-semibold">Verified Photographs</p>
-              </div>
+
+              {/* Admin Quick Upload Button */}
+              {isAuthenticated && user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => setShowAdminUpload(true)}
+                  className="inline-flex items-center gap-2 px-4 py-3 bg-stone-900 hover:bg-stone-800 text-amber-400 text-xs font-bold rounded-2xl shadow-xs border border-stone-800 transition-all cursor-pointer hover:scale-[1.02]"
+                >
+                  <Upload className="w-4 h-4 text-amber-400" />
+                  <span>Upload Photo</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -380,6 +398,14 @@ export const PublicGalleryPage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Admin Photo Upload Modal */}
+      {showAdminUpload && (
+        <AdminPhotoUploadModal
+          onClose={() => setShowAdminUpload(false)}
+          onUploaded={fetchGallery}
+        />
       )}
 
       {/* Footer */}

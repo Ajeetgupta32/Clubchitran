@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { processUpload } from '../middleware/uploadMiddleware.js';
 import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
+import { hashPassword } from '../utils/tokenUtils.js';
 
 export const uploadPhotoSubmission = async (req, res) => {
   try {
@@ -621,4 +622,145 @@ export const deleteSubmission = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message || 'Error deleting photo submission' });
   }
 };
+
+/**
+ * Admin direct upload of photographs to Gallery / Exhibition
+ * Bypasses student submission queue and directly publishes verified photos to the gallery and optionally Top 3 Picks.
+ */
+export const adminUploadPhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Photograph image file is required' });
+    }
+
+    const {
+      activityId,
+      studentName = 'Club Exhibition Feature',
+      branch = 'Photography & Visual Arts',
+      caption,
+      isTopPick,
+      topPickRank
+    } = req.body;
+
+    // 1. Ensure an activity exists or use the selected one
+    let targetActivityId = activityId;
+    if (!targetActivityId || targetActivityId === 'NONE' || targetActivityId === 'DEFAULT') {
+      let defaultActivity = await prisma.activity.findFirst({
+        where: { status: 'PUBLISHED' },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      if (!defaultActivity) {
+        defaultActivity = await prisma.activity.create({
+          data: {
+            title: 'Chitran Annual Photography Exhibition & Heritage Walk',
+            description: 'Curated photography collection capturing Varanasi ghats, campus life, architecture, and street narratives.',
+            category: 'Exhibition',
+            venue: 'Main Campus Art Gallery & Assi Ghat',
+            eventDate: new Date(),
+            deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            status: 'PUBLISHED',
+            createdById: req.user.id
+          }
+        });
+      }
+      targetActivityId = defaultActivity.id;
+    }
+
+    // 2. Find or create a student record to associate with the photograph
+    const cleanStudentName = (studentName || 'Club Photographer').trim();
+    let student = await prisma.student.findFirst({
+      where: {
+        user: { name: { equals: cleanStudentName, mode: 'insensitive' } }
+      },
+      include: { user: true }
+    });
+
+    if (!student) {
+      // Create a student user for this photographer
+      const safeEmail = `photographer_${Date.now()}_${Math.floor(Math.random() * 1000)}@college.edu`;
+      const dummyHash = await hashPassword('Student@123');
+      const newUser = await prisma.user.create({
+        data: {
+          name: cleanStudentName,
+          email: safeEmail,
+          passwordHash: dummyHash,
+          role: 'STUDENT',
+          student: {
+            create: {
+              studentId: `PHOTOCLUB-${Date.now().toString().slice(-4)}`,
+              branch: (branch || 'Photography & Visual Arts').trim(),
+              section: 'A',
+              year: '3rd Year',
+              semester: '5th Sem',
+              points: 100
+            }
+          }
+        },
+        include: { student: true }
+      });
+      student = newUser.student;
+    }
+
+    // 3. Ensure participation exists
+    let participation = await prisma.participation.findUnique({
+      where: {
+        studentId_activityId: {
+          studentId: student.id,
+          activityId: targetActivityId
+        }
+      }
+    });
+
+    if (!participation) {
+      participation = await prisma.participation.create({
+        data: {
+          studentId: student.id,
+          activityId: targetActivityId,
+          status: 'COMPLETED'
+        }
+      });
+    }
+
+    // 4. Process upload to Cloudinary (or local fallback)
+    const uploadResult = await processUpload(req.file, 'college_club/gallery');
+
+    // 5. If setting as Top Pick, clear any existing top pick with the same rank if rank is specified
+    const rankNum = topPickRank ? parseInt(topPickRank, 10) : null;
+    const shouldBeTopPick = isTopPick === 'true' || isTopPick === true;
+
+    if (shouldBeTopPick && rankNum) {
+      await prisma.photoSubmission.updateMany({
+        where: { topPickRank: rankNum, isTopPick: true },
+        data: { isTopPick: false, topPickRank: null }
+      });
+    }
+
+    // 6. Create verified submission
+    const submission = await prisma.photoSubmission.create({
+      data: {
+        participationId: participation.id,
+        photoUrl: uploadResult.url,
+        publicId: uploadResult.publicId,
+        caption: caption ? caption.trim() : null,
+        status: 'VERIFIED',
+        verifiedById: req.user.id,
+        verifiedAt: new Date(),
+        isTopPick: shouldBeTopPick,
+        topPickRank: shouldBeTopPick ? rankNum : null,
+        topPickAwardedAt: shouldBeTopPick ? new Date() : null
+      }
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Photograph successfully uploaded and published to Exhibition Gallery!',
+      submission
+    });
+  } catch (error) {
+    console.error('Admin upload error:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Error uploading photograph' });
+  }
+};
+
 

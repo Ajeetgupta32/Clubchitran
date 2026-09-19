@@ -14,6 +14,7 @@ import StatusBadge from '../../components/ui/StatusBadge';
 import PhotoUploadModal from '../../components/ui/PhotoUploadModal';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 export const StudentActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -136,7 +137,7 @@ export const StudentActivities = () => {
                 {/* Banner */}
                 <div className="h-44 bg-stone-900 relative overflow-hidden">
                   <img
-                    src={act.bannerUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80'}
+                    src={resolveImageUrl(act.bannerUrl) || 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80'}
                     alt={act.title}
                     className="w-full h-full object-cover"
                   />

@@ -7,7 +7,8 @@ import {
   getTopPicks,
   setTopPicks,
   getPublicGallerySubmissions,
-  deleteSubmission
+  deleteSubmission,
+  adminUploadPhoto
 } from '../controllers/submissionController.js';
 import { authenticate, authorize } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -22,6 +23,9 @@ router.get('/gallery', getPublicGallerySubmissions);
 router.use(authenticate);
 
 router.get('/', getSubmissions);
+
+// Admin-only: Upload directly to Gallery / Exhibition
+router.post('/admin-upload', authorize('ADMIN'), upload.single('photo'), adminUploadPhoto);
 
 // Admin-only: Set Top 3 Photo Picks
 router.post('/top-picks', authorize('ADMIN'), setTopPicks);
