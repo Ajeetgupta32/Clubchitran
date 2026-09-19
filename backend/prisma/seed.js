@@ -7,6 +7,8 @@ async function main() {
   console.log('--- Starting College Club Database Seeding ---');
 
   // Clear existing records in reverse dependency order
+  await prisma.certificate.deleteMany();
+  await prisma.certificateRequest.deleteMany();
   await prisma.attendance.deleteMany();
   await prisma.photoSubmission.deleteMany();
   await prisma.participation.deleteMany();

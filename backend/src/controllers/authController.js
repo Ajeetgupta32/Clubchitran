@@ -3,22 +3,53 @@ import { comparePassword, hashPassword, generateToken } from '../utils/tokenUtil
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, identifier, password } = req.body;
+    const loginId = (email || identifier || '').trim();
 
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    if (!loginId || !password) {
+      return res.status(400).json({ success: false, message: 'Email/ID and password are required' });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+    // 1. Try finding user by email (case-insensitive)
+    let user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: loginId,
+          mode: 'insensitive'
+        }
+      },
       include: {
         student: true,
         coordinator: true
       }
     });
 
+    // 2. If not found by email, check if loginId matches a Student's studentId / Roll number
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      const studentRecord = await prisma.student.findFirst({
+        where: {
+          studentId: {
+            equals: loginId,
+            mode: 'insensitive'
+          }
+        },
+        include: {
+          user: {
+            include: {
+              student: true,
+              coordinator: true
+            }
+          }
+        }
+      });
+
+      if (studentRecord?.user) {
+        user = studentRecord.user;
+      }
+    }
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials. User not found.' });
     }
 
     const isMatch = await comparePassword(password, user.passwordHash);

@@ -118,21 +118,13 @@ export const HomePage = () => {
                 </span>
               </Link>
             ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="px-3.5 py-2 text-xs font-bold text-stone-600 hover:text-stone-950 hover:bg-stone-100 rounded-xl border border-transparent transition-all"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all"
-                >
-                  <span>Join Chitran Club</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </>
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+              >
+                <span>Sign In</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             )}
           </div>
         </div>

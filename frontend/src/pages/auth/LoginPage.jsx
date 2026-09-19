@@ -5,9 +5,6 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  ShieldCheck,
-  Compass,
-  Sparkles,
   Home
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -24,7 +21,7 @@ export const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Please enter email and password');
+      toast.error('Please enter email / student ID and password');
       return;
     }
 
@@ -35,6 +32,7 @@ export const LoginPage = () => {
         login(res.data.user, res.data.token);
         toast.success(`Welcome back, ${res.data.user.name}!`);
 
+        // Dynamic redirection based on user role
         if (res.data.user.role === 'ADMIN') {
           navigate('/admin/dashboard');
         } else if (res.data.user.role === 'COORDINATOR') {
@@ -48,11 +46,6 @@ export const LoginPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillCredentials = (quickEmail, quickPassword) => {
-    setEmail(quickEmail);
-    setPassword(quickPassword);
   };
 
   return (
@@ -90,18 +83,18 @@ export const LoginPage = () => {
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
               <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
-                College Email
+                Email or Student ID
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="user@college.edu"
+                  placeholder="Enter email or student ID..."
                   className="w-full text-xs pl-10 pr-3 py-2.5 rounded-xl border border-[#E8E2D5] focus:outline-none focus:ring-2 focus:ring-amber-700 focus:border-transparent transition-all bg-[#FDFCFB] text-stone-900 placeholder:text-stone-400"
                 />
               </div>
@@ -141,71 +134,6 @@ export const LoginPage = () => {
               )}
             </button>
           </form>
-
-          {/* Student Registration Link */}
-          <div className="mt-4 text-center">
-            <p className="text-xs text-stone-500">
-              New student?{' '}
-              <Link to="/register" className="font-bold text-amber-800 hover:text-amber-900 underline transition-colors">
-                Register as Student
-              </Link>
-            </p>
-          </div>
-
-          {/* 1-Click Demo Credentials Switcher */}
-          <div className="mt-6 pt-5 border-t border-[#E8E2D5]">
-            <p className="text-[11px] font-bold text-stone-500 uppercase tracking-wider text-center mb-3">
-              1-Click Demo Accounts
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => fillCredentials('admin@college.edu', 'Admin@123')}
-                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100/70 transition-all text-amber-950 cursor-pointer shadow-xs"
-              >
-                <ShieldCheck className="w-4 h-4 text-amber-700 mb-0.5" />
-                <span className="text-[11px] font-bold">Admin</span>
-                <span className="text-[9px] text-amber-800/80">Dean Admin</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillCredentials('coordinator1@college.edu', 'Coord@123')}
-                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/70 transition-all text-emerald-950 cursor-pointer shadow-xs"
-              >
-                <Compass className="w-4 h-4 text-emerald-700 mb-0.5" />
-                <span className="text-[11px] font-bold">Coordinator</span>
-                <span className="text-[9px] text-emerald-800/80">CSE Branch</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fillCredentials('student1@college.edu', 'Student@123')}
-                className="flex flex-col items-center justify-center p-2.5 rounded-xl border border-stone-200 bg-stone-100/70 hover:bg-stone-200/70 transition-all text-stone-900 cursor-pointer shadow-xs"
-              >
-                <Sparkles className="w-4 h-4 text-stone-700 mb-0.5" />
-                <span className="text-[11px] font-bold">Student</span>
-                <span className="text-[9px] text-stone-600">Aarav Patel</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <button
-                type="button"
-                onClick={() => fillCredentials('student2@college.edu', 'Student@123')}
-                className="p-1.5 rounded-lg border border-[#E8E2D5] bg-[#FAF8F5] hover:bg-stone-100 text-[10px] text-stone-600 hover:text-stone-900 font-medium text-center truncate transition-colors cursor-pointer"
-              >
-                Student 2 (Pending Proof)
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('student3@college.edu', 'Student@123')}
-                className="p-1.5 rounded-lg border border-[#E8E2D5] bg-[#FAF8F5] hover:bg-stone-100 text-[10px] text-stone-600 hover:text-stone-900 font-medium text-center truncate transition-colors cursor-pointer"
-              >
-                Student 3 (Rejected Proof)
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
