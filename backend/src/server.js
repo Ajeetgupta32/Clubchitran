@@ -42,7 +42,20 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static uploaded files (safe fallback for local proof photos and banners)
 app.use('/uploads', express.static(uploadsDir));
 
-// Health check
+// Root & Health check endpoints (for Render health checks, browser visits, and uptime monitors)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'College Club Management API is running',
+    status: 'healthy',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', service: 'College Club Management API', timestamp: new Date() });
+});
+
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'College Club Management API', timestamp: new Date() });
 });
@@ -65,22 +78,22 @@ import { hashPassword } from './utils/tokenUtils.js';
 
 const ensureAdminAccount = async () => {
   try {
-    const adminEmail = 'admin@college.edu';
+    const adminEmail = 'gulshangupta3124@gmail.com';
     const existingAdmin = await prisma.user.findUnique({
       where: { email: adminEmail }
     });
 
     if (!existingAdmin) {
-      const passwordHash = await hashPassword('Admin@123');
+      const passwordHash = await hashPassword('Ajeetgupta123@');
       await prisma.user.create({
         data: {
-          name: 'Dr. Rajesh Sharma (Dean / Admin)',
+          name: 'Ajeet Gupta (Tech Head)',
           email: adminEmail,
           passwordHash,
           role: 'ADMIN'
         }
       });
-      console.log('Fixed Admin account ensured: admin@college.edu / Admin@123');
+      console.log('Admin account ensured: gulshangupta3124@gmail.com');
     }
   } catch (err) {
     console.error('Error ensuring admin account:', err.message);
