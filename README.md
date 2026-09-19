@@ -1,6 +1,6 @@
 # College Club Activity & Attendance Management System
 
-A modern, responsive, full-stack college club activity and attendance management platform built with **React (Vite) + Tailwind CSS**, **Node.js (Express)**, **PostgreSQL (Prisma ORM)**, **JWT + bcrypt**, **Cloudinary** (with seamless local fallback), and **ExcelJS**.
+A modern, responsive, full-stack college club activity and attendance management platform built with **React (Vite) + Tailwind CSS**, **Node.js (Express)**, **PostgreSQL (Prisma ORM)**, **JWT + bcrypt**, **Multer** (device filesystem storage), and **ExcelJS**.
 
 ---
 
@@ -44,7 +44,7 @@ A modern, responsive, full-stack college club activity and attendance management
 | **Frontend** | React 18, Vite, Tailwind CSS v3, React Router DOM v6, Lucide React, Axios, React Hot Toast |
 | **Backend** | Node.js (ESM), Express.js, Prisma ORM, JWT, bcryptjs, Multer, ExcelJS, Morgan |
 | **Database** | PostgreSQL 18 |
-| **File Uploads** | Cloudinary SDK with automatic local storage fallback |
+| **File Uploads** | Multer disk storage (stored directly on device in `uploads/` directory) |
 | **Excel Reports** | ExcelJS (`.xlsx` formatted with headers, styles, auto-widths, and status pills) |
 
 ---

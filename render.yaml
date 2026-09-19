@@ -21,14 +21,6 @@ services:
         value: 7d
       - key: CLIENT_URL
         value: "*" # Replace with your Vercel deployment URL (e.g. https://your-club.vercel.app)
-      - key: CLOUDINARY_CLOUD_NAME
-        value: k7ebomyr
-      - key: CLOUDINARY_API_KEY
-        value: "379819438559986"
-      - key: CLOUDINARY_API_SECRET
-        value: rvqUFd1eezzYXVQppMQmF7P6LBQ
-      - key: CLOUDINARY_URL
-        value: cloudinary://379819438559986:rvqUFd1eezzYXVQppMQmF7P6LBQ@k7ebomyr
 
 databases:
   - name: college-club-db

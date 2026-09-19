@@ -138,7 +138,7 @@ export const AdminPhotoUploadModal = ({ onClose, onUploaded }) => {
                   <Upload className="w-6 h-6" />
                 </div>
                 <p className="text-xs font-bold text-stone-800">Click to choose image or drag & drop</p>
-                <p className="text-[11px] text-stone-500 mt-1">Direct upload to Cloudinary (JPG, PNG, WEBP)</p>
+                <p className="text-[11px] text-stone-500 mt-1">High-resolution photography upload (JPG, PNG, WEBP)</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -263,7 +263,7 @@ export const AdminPhotoUploadModal = ({ onClose, onUploaded }) => {
               className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-stone-900 hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-xs transition-all cursor-pointer"
             >
               <Upload className="w-4 h-4 text-amber-400" />
-              {uploading ? 'Uploading to Cloudinary...' : 'Publish to Gallery'}
+              {uploading ? 'Uploading Photo...' : 'Publish to Gallery'}
             </button>
           </div>
         </form>

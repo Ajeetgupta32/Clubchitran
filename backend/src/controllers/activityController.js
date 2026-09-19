@@ -1,5 +1,7 @@
+import fs from 'fs';
+import path from 'path';
 import prisma from '../config/db.js';
-import { processUpload } from '../middleware/uploadMiddleware.js';
+import { processUpload, uploadDir } from '../middleware/uploadMiddleware.js';
 
 export const createActivity = async (req, res) => {
   try {
@@ -11,7 +13,7 @@ export const createActivity = async (req, res) => {
 
     let bannerUrl = null;
     if (req.file) {
-      const uploadRes = await processUpload(req.file, 'college_club/banners');
+      const uploadRes = await processUpload(req.file);
       bannerUrl = uploadRes.url;
     }
 
@@ -293,8 +295,20 @@ export const updateActivity = async (req, res) => {
 
     let bannerUrl = existing.bannerUrl;
     if (req.file) {
-      const uploadRes = await processUpload(req.file, 'college_club/banners');
+      const uploadRes = await processUpload(req.file);
       bannerUrl = uploadRes.url;
+
+      // Clean up previous local banner if replaced
+      if (existing.bannerUrl && existing.bannerUrl.startsWith('/uploads/')) {
+        try {
+          const oldFile = path.join(uploadDir, path.basename(existing.bannerUrl));
+          if (fs.existsSync(oldFile)) {
+            await fs.promises.unlink(oldFile);
+          }
+        } catch (e) {
+          console.warn('[Storage] Error cleaning old banner:', e.message);
+        }
+      }
     }
 
     const dataToUpdate = {
@@ -405,6 +419,19 @@ export const deleteActivity = async (req, res) => {
       // Finally delete the activity
       await tx.activity.delete({ where: { id } });
     });
+
+    // Clean up local banner image on device if stored locally
+    if (existing.bannerUrl && existing.bannerUrl.startsWith('/uploads/')) {
+      try {
+        const bannerFile = path.join(uploadDir, path.basename(existing.bannerUrl));
+        if (fs.existsSync(bannerFile)) {
+          await fs.promises.unlink(bannerFile);
+          console.log('[Storage] Deleted local banner file from device:', bannerFile);
+        }
+      } catch (err) {
+        console.warn('[Storage] Error deleting local banner file:', err.message);
+      }
+    }
 
     return res.status(200).json({ success: true, message: 'Activity deleted successfully' });
   } catch (error) {

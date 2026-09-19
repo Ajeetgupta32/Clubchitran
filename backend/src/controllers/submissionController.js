@@ -1,6 +1,7 @@
+import fs from 'fs';
+import path from 'path';
 import prisma from '../config/db.js';
-import { processUpload } from '../middleware/uploadMiddleware.js';
-import { cloudinary, isCloudinaryConfigured } from '../config/cloudinary.js';
+import { processUpload, uploadDir } from '../middleware/uploadMiddleware.js';
 import { hashPassword } from '../utils/tokenUtils.js';
 
 export const uploadPhotoSubmission = async (req, res) => {
@@ -49,8 +50,8 @@ export const uploadPhotoSubmission = async (req, res) => {
       });
     }
 
-    // Process photo upload (Cloudinary or local storage fallback)
-    const uploadResult = await processUpload(req.file, 'college_club/proofs');
+    // Process photo upload directly onto device via Multer
+    const uploadResult = await processUpload(req.file);
 
     // Create the submission record. Notice: Attendance is STRICTLY NOT created here!
     const submission = await prisma.photoSubmission.create({
@@ -599,12 +600,17 @@ export const deleteSubmission = async (req, res) => {
       }
     }
 
-    // Remove photo from Cloudinary if publicId exists
-    if (existing.publicId && isCloudinaryConfigured) {
+    // Remove photo from local device disk if stored locally
+    if (existing.photoUrl && existing.photoUrl.startsWith('/uploads/')) {
       try {
-        await cloudinary.uploader.destroy(existing.publicId);
+        const filename = path.basename(existing.photoUrl);
+        const filePath = path.join(uploadDir, filename);
+        if (fs.existsSync(filePath)) {
+          await fs.promises.unlink(filePath);
+          console.log('[Storage] Deleted local photo file from device:', filename);
+        }
       } catch (err) {
-        console.warn('[Cloudinary] Error destroying image:', err.message);
+        console.warn('[Storage] Error deleting local image file:', err.message);
       }
     }
 
@@ -722,8 +728,8 @@ export const adminUploadPhoto = async (req, res) => {
       });
     }
 
-    // 4. Process upload to Cloudinary (or local fallback)
-    const uploadResult = await processUpload(req.file, 'college_club/gallery');
+    // 4. Process upload to local device via Multer
+    const uploadResult = await processUpload(req.file);
 
     // 5. If setting as Top Pick, clear any existing top pick with the same rank if rank is specified
     const rankNum = topPickRank ? parseInt(topPickRank, 10) : null;

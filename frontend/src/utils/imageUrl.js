@@ -13,10 +13,10 @@ export const handleImageFallback = (e, fallbackUrl = DEFAULT_PHOTO_PLACEHOLDER) 
 
 /**
  * Resolves media and photo URLs dynamically.
- * - Absolute URLs (Cloudinary, Unsplash, HTTPS) are returned as-is.
+ * - Absolute URLs (HTTPS, external CDNs) are returned as-is.
  * - Relative URLs (/uploads/...) are prepended with VITE_API_BASE_URL in production,
  *   or kept relative in local development where Vite dev server proxies /uploads.
- * - In production without VITE_API_BASE_URL, relative /uploads/ URLs fall back gracefully.
+ * - Stored directly on local device storage via Multer.
  *
  * @param {string} url
  * @param {string} fallback
