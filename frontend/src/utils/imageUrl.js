@@ -23,7 +23,7 @@ export const handleImageFallback = (e, fallbackUrl = DEFAULT_PHOTO_PLACEHOLDER) 
  * @returns {string}
  */
 export const resolveImageUrl = (url, fallback = '') => {
-  if (!url) return fallback;
+  if (!url) return fallback || DEFAULT_PHOTO_PLACEHOLDER;
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
     return url;
   }
